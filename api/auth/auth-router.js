@@ -4,8 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { TOKEN_SECRET } = require('../../config/secrets');
 
-const Jokes = require('../jokes/jokes-data.js')
-//const authRouter = require('../auth/auth-model')
+const Users = require('./auth-model');
+
 
 const checkAuthPayload = require('./check-payload-middleware');
 
@@ -27,7 +27,7 @@ function buildToken(user) {
     const hash = bcrypt.hashSync(user.password, rounds);
     user.password = hash
   
-    Jokes.add(user)
+    Users.add(user)
       .then(saved => {
         res.status(201).json({ message: `Great to have you, ${saved.username}` });
       })
@@ -37,7 +37,7 @@ function buildToken(user) {
   router.post('/login', checkAuthPayload, (req, res, next) => {
     let { username, password } = req.body;
   
-    Jokes.findBy({ username })
+    Users.findBy({ username })
       .then(([user]) => {
         if (user && bcrypt.compareSync(password, user.password)) {
           const token = buildToken(user)
